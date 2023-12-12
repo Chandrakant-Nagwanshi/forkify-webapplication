@@ -123,21 +123,42 @@ class recipeView extends View {
   </div>
     `;
   }
-
   _generateMarkupIngredients(ing) {
+    const convertToFraction = function (decimal) {
+      const tolerance = 1.0e-6; // Define a tolerance for precision
+      let h1 = 1;
+      let h2 = 0;
+      let k1 = 0;
+      let k2 = 1;
+      let b = decimal;
+
+      do {
+        const a = Math.floor(b);
+        let temp = h1;
+        h1 = a * h1 + h2;
+        h2 = temp;
+        temp = k1;
+        k1 = a * k1 + k2;
+        k2 = temp;
+        b = 1 / (b - a);
+      } while (Math.abs(decimal - h1 / k1) > decimal * tolerance);
+
+      return `${h1}/${k1}`;
+    };
+
     return `
-    <li class="recipe__ingredient">
-      <svg class="recipe__icon">
-        <use href="${icons}#icon-check"></use>
-      </svg>
-      <div class="recipe__quantity">${
-        ing.quantity ? new Fraction(ing.quantity).toString() : ''
-      }</div>
-      <div class="recipe__description">
-        <span class="recipe__unit">${ing.unit}</span>
-        ${ing.description}
-      </div>
-    </li>`;
+      <li class="recipe__ingredient">
+        <svg class="recipe__icon">
+          <use href="${icons}#icon-check"></use>
+        </svg>
+        <div class="recipe__quantity">${
+          ing.quantity ? convertToFraction(ing.quantity) : ''
+        }</div>
+        <div class="recipe__description">
+          <span class="recipe__unit">${ing.unit}</span>
+          ${ing.description}
+        </div>
+      </li>`;
   }
 }
 export default new recipeView();
